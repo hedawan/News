@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/news_home"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="@string/home" />
+        <item
+            android:id="@+id/news_setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/setting" />
+        <item
+            android:id="@+id/news_about"
+            android:icon="@drawable/ic_about_black_24dp"
+            android:title="@string/about" />
+    </group>
+</menu>
