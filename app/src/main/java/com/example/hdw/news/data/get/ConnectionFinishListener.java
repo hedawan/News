@@ -7,5 +7,5 @@ import javax.sql.ConnectionEvent;
  */
 
 public interface ConnectionFinishListener {
-    void connectionFinish(ConnectionFinishEvent Event);
+    void connectionFinish(ConnectionFinishEvent event);
 }

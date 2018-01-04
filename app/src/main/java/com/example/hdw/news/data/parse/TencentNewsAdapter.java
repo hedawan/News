@@ -1,5 +1,7 @@
 package com.example.hdw.news.data.parse;
 
+import android.util.Log;
+
 import com.example.hdw.news.data.news.TencentNews;
 
 import org.json.JSONArray;
@@ -8,7 +10,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 
 import okhttp3.Response;
 
@@ -17,13 +18,28 @@ import okhttp3.Response;
  */
 
 public class TencentNewsAdapter extends NewsAdapter<TencentNews> {
+    public static final int ID_PARSE = 1;
+    public static final int NEWS_PARSE = 2;
+    public static final int ALL_PARSE = 3;
+    private int mParse;
+    private static final String TAG = "TencentNewsAdapter";
     private Response mResponse;
     private TencentNews mTencentNews;
-
+    private String mJson;
 
     public TencentNewsAdapter(Response response) {
+        this(ALL_PARSE,response,new TencentNews());
+    }
+
+    public TencentNewsAdapter(int parse, Response response, TencentNews tencentNews) {
+        mParse = parse;
         mResponse = response;
-        mTencentNews = new TencentNews();
+        mTencentNews = tencentNews;
+        try {
+            mJson = response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -36,39 +52,63 @@ public class TencentNewsAdapter extends NewsAdapter<TencentNews> {
 
     @Override
     public void parse() {
+        JSONObject jsonObject = null;
+        JSONArray jsonArray = null;
         try {
-            JSONObject jsonObject = new JSONObject(mResponse.body().string());
-            JSONArray jsonArray = jsonObject.getJSONArray("idlist");
-            jsonObject = jsonArray.getJSONObject(0);
-            JSONArray ids = jsonObject.getJSONArray("ids");
-            JSONArray newList = jsonObject.getJSONArray("newList");
-            List<String> idsList = mTencentNews.getIdList();
-            for (int i = 0; i < ids.length(); i++) {
-                jsonObject = ids.getJSONObject(i);
-                idsList.add(jsonObject.getString("id"));
+            jsonObject = new JSONObject(mJson);
+            switch (mParse) {
+                case ID_PARSE:
+                    jsonArray = jsonObject.getJSONArray("idlist");
+                    jsonObject = jsonArray.getJSONObject(0);
+                    idParse(jsonObject.getJSONArray("ids"), mTencentNews.getIdList());
+                    break;
+                case NEWS_PARSE:
+                    if (!jsonObject.isNull("idlist")) {
+                        jsonArray = jsonObject.getJSONArray("idlist");
+                        jsonObject = jsonArray.getJSONObject(0);
+                    }
+                    newsParse(jsonObject.getJSONArray("newslist"), mTencentNews.getTencentNewsList());
+                    break;
+                case ALL_PARSE:
+                    jsonArray = jsonObject.getJSONArray("idlist");
+                    jsonObject = jsonArray.getJSONObject(0);
+                    idParse(jsonObject.getJSONArray("ids"), mTencentNews.getIdList());
+                    newsParse(jsonObject.getJSONArray("newslist"), mTencentNews.getTencentNewsList());
+                    break;
             }
-            List<TencentNews.TencentNewsItem> newsItemList = mTencentNews.getTencentNewsList();
-            for (int i = 0; i < newList.length(); i++) {
-                jsonObject = newList.getJSONObject(i);
-                TencentNews.TencentNewsItem item = mTencentNews.new TencentNewsItem();
-                item.mNewsId = jsonObject.getString("id");
-                item.mTitle = jsonObject.getString("title");
-                item.mNewsUrl = jsonObject.getString("url");
-                item.mNewsTime = jsonObject.getString("time");
-                item.mNewsSource = jsonObject.getString("source");
-                JSONArray temp = jsonObject.getJSONArray("thumbnails");
-                item.mNewsImageUrl.add(temp.getString(0));
-                temp = jsonObject.getJSONArray("ext_data");
-                item.mNewsImageUrl.add(temp.getString(1));
-                item.mNewsImageUrl.add(temp.getString(2));
-                temp = jsonObject.getJSONArray("thumbnails_qqnews");
-                item.mNewsImageUrl.add(temp.getString(0));
-            }
-            notifyAdapterFinishListener(mTencentNews);
         } catch (JSONException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        notifyAdapterFinishListener(mTencentNews);
+    }
+
+    public void idParse(JSONArray idArray, List<String> idList) throws JSONException {
+        JSONObject jsonObject = null;
+        for (int i = 0; i < idArray.length(); i++) {
+            jsonObject = idArray.getJSONObject(i);
+            idList.add(jsonObject.getString("id"));
+        }
+    }
+
+    public void newsParse(JSONArray newsArray, List<TencentNews.TencentNewsItem> newsItemList) throws JSONException {
+        TencentNews.TencentNewsItem item;
+        JSONObject jsonObject;
+        for (int i = 0; i < newsArray.length(); i++) {
+            Log.d(TAG, "parse: position" + i);
+            jsonObject = newsArray.getJSONObject(i);
+            item = mTencentNews.new TencentNewsItem();
+            item.mNewsId = jsonObject.getString("id");
+            item.mTitle = jsonObject.getString("title");
+            item.mNewsUrl = jsonObject.getString("url");
+            item.mNewsTime = jsonObject.getString("time");
+            item.mNewsSource = jsonObject.getString("source");
+            item.mNewsImageUrl.add(jsonObject.getJSONArray("thumbnails").getString(0));
+//                Log.d(TAG, "parse: ext_data ="+jsonObject.isNull("ext_data"));
+//                JSONObject tempObj = jsonObject.getJSONObject("ext_data");
+//                item.mNewsImageUrl.add(tempObj.getString("Fimgurl32"));
+//                item.mNewsImageUrl.add(tempObj.getString("Fimgurl30"));
+            item.mNewsImageUrl.add(jsonObject.getJSONArray("thumbnails_qqnews").getString(0));
+            newsItemList.add(item);
         }
     }
 
@@ -78,6 +118,14 @@ public class TencentNewsAdapter extends NewsAdapter<TencentNews> {
 
     public void setResponse(Response response) {
         mResponse = response;
+    }
+
+    public void setParse(int parse) {
+        mParse = parse;
+    }
+
+    public void setTencentNews(TencentNews tencentNews) {
+        mTencentNews = tencentNews;
     }
 
     public TencentNews getTencentNews() {

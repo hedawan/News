@@ -18,6 +18,7 @@ public class MainViewDirector extends ViewBuildDirector {
         mViewBuilder.buildToolbar();
         mViewBuilder.buildNavigation();
         mViewBuilder.buildDrawerLayout();
+        mViewBuilder.buildAdapter();
         return mViewBuilder.getResult();
     }
 }

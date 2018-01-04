@@ -1,5 +1,7 @@
 package com.example.hdw.news.data.parse;
 
+import android.app.DownloadManager;
+
 import com.example.hdw.news.data.news.TencentNews;
 
 /**
