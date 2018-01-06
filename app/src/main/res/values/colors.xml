@@ -3,6 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="blueColorPrimary">#2196F3</color>
+    <!-- blueColorPrimaryDark#1976D2-->
+    <color name="blueColorPrimaryDark">#2196F3</color>
+    <color name="blueColorAccent">#2979FF</color>
     <color name="ask">#DDDDDD</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>

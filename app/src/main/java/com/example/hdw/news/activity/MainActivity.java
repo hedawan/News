@@ -18,6 +18,7 @@ import com.example.hdw.news.data.get.GetNetworkData;
 import com.example.hdw.news.data.parse.AdapterFinishEvent;
 import com.example.hdw.news.data.parse.AdapterFinishListener;
 import com.example.hdw.news.data.parse.TencentNewsAdapter;
+import com.example.hdw.news.data.save.SettingData;
 import com.facebook.drawee.backends.pipeline.Fresco;
 
 import okhttp3.OkHttpClient;
@@ -35,12 +36,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionFinishL
         MainViewDirector mainViewDirector = new MainViewDirector(mainViewBuilder);
         mView = mainViewDirector.construct();
         setContentView(mView);
-        Fresco.initialize(this);
         mUpdateUI = UpdateUI.getInstance();
         OkHttpClient client = new OkHttpClient();
-        String url = "http://openapi.inews.qq.com/getQQNewsIndexAndItems?chlid=news_news_top&refer=mobilewwwqqcom";
         Request request = new Request.Builder()
-                .url(url)
+                .url(SettingData.getInstance().getNewsUrl())
                 .build();
         GetNetworkData getNetworkData = new GetNetworkData(client, request);
         getNetworkData.addConnectionFinishListener(this);

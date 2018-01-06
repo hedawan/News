@@ -5,4 +5,13 @@
     <string name="about">About</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="loading">Loading...</string>
+    <string name="news_detail">News detail</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="news_open_alert">Open mode</string>
+    <string-array name="news_open_mode">
+        <item>News WebView</item>
+        <item>System browser</item>
+    </string-array>
 </resources>

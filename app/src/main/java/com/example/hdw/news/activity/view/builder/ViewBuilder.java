@@ -10,7 +10,7 @@ import android.view.View;
 
 public abstract class ViewBuilder implements Builder<View>{
     private Context mContext;
-    protected View mView;
+    private View mView;
     private LayoutInflater mLayoutInflater;
 
     public ViewBuilder(Context context) {
@@ -23,8 +23,7 @@ public abstract class ViewBuilder implements Builder<View>{
         mView = mLayoutInflater.inflate(resource, null, false);
     }
 
-    public void buildView(){
-    };
+    public void buildView(){};
     public void buildToolbar(){};
     public void buildNavigation(){};
     public void buildDrawerLayout(){}
@@ -35,12 +34,16 @@ public abstract class ViewBuilder implements Builder<View>{
         return mView;
     }
 
-    public <T extends View> T findViewById(int id){
+    public final <T extends View> T findViewById(int id){
         return mView.findViewById(id);
     }
 
     public Context getContext() {
         return mContext;
+    }
+
+    public View getView() {
+        return mView;
     }
 
     public void setContext(Context context) {

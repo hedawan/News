@@ -3,8 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="180dp"
     android:orientation="vertical"
-    android:background="@color/colorPrimary">
-
-
+    android:background="@color/blueColorPrimary">
 
 </LinearLayout>
