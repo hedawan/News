@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/gray">
+
+    <include layout="@layout/base_toolbar" />
+
+    <RelativeLayout
+        android:id="@+id/news_read_mode"
+        style="@style/ButtonSelector">
+
+        <TextView
+            style="@style/Text"
+            android:text="@string/news_read_mode" />
+
+        <ImageView
+            style="@style/Image"
+            android:src="@drawable/ic_chevron_right_black_24dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/ButtonSelector">
+
+        <TextView
+            style="@style/Text"
+            android:text="@string/news_update" />
+
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/news_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            app:kswBackColor="@color/button_md_color"
+            app:kswThumbDrawable="@drawable/button_md_style"
+            app:kswThumbMarginBottom="-14dp"
+            app:kswThumbMarginTop="-14dp"
+            app:kswThumbMarginLeft="-16dp"
+            app:kswThumbMarginRight="-16dp"
+            app:kswThumbRangeRatio="1.45"
+            app:kswThumbWidth="@dimen/ksw_md_thumb_ripple_size"
+            app:kswThumbHeight="@dimen/ksw_md_thumb_ripple_size"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/news_update_time"
+        style="@style/ButtonSelector">
+
+        <TextView
+            android:id="@+id/news_update_time_text"
+            style="@style/Text"
+            android:text="@string/news_update_time" />
+
+        <ImageView
+            style="@style/Image"
+            android:src="@drawable/ic_chevron_right_black_24dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/news_url"
+        style="@style/ButtonSelector">
+
+        <TextView
+            style="@style/Text"
+            android:text="@string/news_url" />
+
+        <ImageView
+            style="@style/Image"
+            android:src="@drawable/ic_chevron_right_black_24dp" />
+    </RelativeLayout>
+
+</LinearLayout>

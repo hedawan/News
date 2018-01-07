@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -18,14 +19,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.example.hdw.news.R;
 import com.example.hdw.news.activity.NewsActivity;
 import com.example.hdw.news.activity.update.UpdateUI;
 import com.example.hdw.news.activity.update.UpdateUIListener;
+import com.example.hdw.news.activity.view.director.SettingViewDirector;
 import com.example.hdw.news.data.get.ConnectionFinishEvent;
 import com.example.hdw.news.data.get.ConnectionFinishListener;
 import com.example.hdw.news.data.get.GetNetworkData;
@@ -33,6 +37,7 @@ import com.example.hdw.news.data.news.TencentNews;
 import com.example.hdw.news.data.parse.AdapterFinishEvent;
 import com.example.hdw.news.data.parse.AdapterFinishListener;
 import com.example.hdw.news.data.parse.TencentNewsAdapter;
+import com.example.hdw.news.data.save.SettingData;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.controller.ControllerListener;
@@ -57,50 +62,71 @@ public class MainViewBuilder extends ViewBuilder {
     private RecyclerView mRecyclerView;
     private NestedScrollView mNestedScrollView;
     private NewsItemClickListener mNewsItemClickListener;
+    private View mHomeView;
+    private View mSettingView;
+    private View mAboutView;
 
     public MainViewBuilder(Context context) {
         super(context, R.layout.activity_main);
     }
 
     @Override
+    public void buildView() {
+        if (mHomeView == null) {
+            mHomeView = getLayoutInflater().inflate(R.layout.home, null, false);
+        }
+        FrameLayout frameLayout = findViewById(R.id.main_view);
+        frameLayout.addView(mHomeView);
+    }
+
+    @Override
     public void buildToolbar() {
-        mToolbar = findViewById(R.id.toolbar);
-        mToolbar.setTitle(R.string.home);
-        ((AppCompatActivity) getContext()).setSupportActionBar(mToolbar);
+        if (mToolbar == null) {
+            mToolbar = findViewById(R.id.toolbar);
+            mToolbar.setTitle(R.string.home);
+            ((AppCompatActivity) getContext()).setSupportActionBar(mToolbar);
+        }
     }
 
     @Override
     public void buildNavigation() {
-        mNavigationView = findViewById(R.id.navigation);
-        mNavigationView.setCheckedItem(R.id.news_home);
+        if (mNavigationView == null) {
+            mNavigationView = findViewById(R.id.navigation);
+            mNavigationView.setCheckedItem(R.id.news_home);
+            mNavigationView.setNavigationItemSelectedListener(new NavigationListener());
+        }
     }
 
     @Override
     public void buildDrawerLayout() {
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle((AppCompatActivity) getContext(), mDrawerLayout, mToolbar, R.string.open, R.string.close);
-        drawerToggle.syncState();
-        mDrawerLayout.addDrawerListener(drawerToggle);
+        if (mDrawerLayout == null) {
+            mDrawerLayout = findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle((AppCompatActivity) getContext(), mDrawerLayout, mToolbar, R.string.open, R.string.close);
+            drawerToggle.syncState();
+            mDrawerLayout.addDrawerListener(drawerToggle);
+        }
     }
 
     @Override
     public void buildAdapter() {
-        mRecyclerView = findViewById(R.id.news_list);
-        LinearLayoutManager manager = new LinearLayoutManager(getContext());
-        final NewsListAdapter newsListAdapter = new NewsListAdapter();
-        mNestedScrollView = findViewById(R.id.nested_scroll_view);
-        mNewsItemClickListener = new NewsItemClickListener(getContext(),newsListAdapter);
+        if (mRecyclerView == null) {
+            mRecyclerView = findViewById(R.id.news_list);
+            LinearLayoutManager manager = new LinearLayoutManager(getContext());
+            final NewsListAdapter newsListAdapter = new NewsListAdapter();
+            mNestedScrollView = findViewById(R.id.nested_scroll_view);
+            mNewsItemClickListener = new NewsItemClickListener(getContext(), newsListAdapter);
 
-        manager.setSmoothScrollbarEnabled(true);
-        manager.setAutoMeasureEnabled(true);
+            manager.setSmoothScrollbarEnabled(true);
+            manager.setAutoMeasureEnabled(true);
 
-        mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.setAdapter(newsListAdapter);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setNestedScrollingEnabled(false);
-        newsListAdapter.setOnItemClickListener(mNewsItemClickListener);
+            mRecyclerView.setLayoutManager(manager);
+            mRecyclerView.setAdapter(newsListAdapter);
+            mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.setNestedScrollingEnabled(false);
+            newsListAdapter.setOnItemClickListener(mNewsItemClickListener);
 
-        mNestedScrollView.setOnScrollChangeListener(new NewsLoad(newsListAdapter));
+            mNestedScrollView.setOnScrollChangeListener(new NewsLoad(newsListAdapter));
+        }
         Log.d(TAG, "buildAdapter: ");
     }
 
@@ -266,52 +292,60 @@ public class MainViewBuilder extends ViewBuilder {
         public static final int NEWS_WEB_VIEW = 0;
         public static final int SYSTEM_BROWSER = 1;
         private Context mContext;
-        private int mSingleChoiceItem;
-        private String mNewsUrl;
         private NewsListAdapter mAdapter;
 
         public NewsItemClickListener(Context context,NewsListAdapter adapter) {
             mContext = context;
-            mSingleChoiceItem = 0;
             mAdapter = adapter;
         }
 
         @Override
         public void onItemClick(View view, int position) {
-            mNewsUrl = mAdapter.getTencentNewsList().get(position).mNewsUrl;
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setTitle(R.string.news_open_alert)
-                    .setSingleChoiceItems(R.array.news_open_mode, 0, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Log.d(TAG, "onClick: singleChoice" + which);
-                            mSingleChoiceItem = which;
-                        }
-                    })
-                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Log.d(TAG, "onClick: on dialog OK which=" + which);
-                            switch (mSingleChoiceItem) {
-                                case NEWS_WEB_VIEW:
-                                    Log.d(TAG, "onClick: " + which);
-                                    NewsActivity.startNewsActivity(mContext, mNewsUrl);
-                                    break;
-                                case SYSTEM_BROWSER:
-                                    Log.d(TAG, "onClick: sy" + which);
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setData(Uri.parse(mNewsUrl));
-                                    mContext.startActivity(intent);
-                                    break;
-                            }
-                        }
-                    })
-                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-            builder.show();
+            String newsUrl = mAdapter.getTencentNewsList().get(position).mNewsUrl;
+            switch (SettingData.getInstance().getReadNewsMode()) {
+                case SettingData.WEB_VIEW:
+                    NewsActivity.startNewsActivity(mContext, newsUrl);
+                    break;
+                case SettingData.SYSTEM_BROWSER:
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(newsUrl));
+                    mContext.startActivity(intent);
+                    break;
+            }
+        }
+    }
+
+    public class NavigationListener implements NavigationView.OnNavigationItemSelectedListener {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            boolean result = false;
+            FrameLayout frameLayout = findViewById(R.id.main_view);
+            switch (item.getItemId()) {
+                case R.id.news_home:
+                    Log.d(TAG, "onNavigationItemSelected: home");
+                    frameLayout.removeAllViews();
+                    frameLayout.addView(mHomeView);
+                    result = true;
+                    break;
+                case R.id.news_setting:
+                    Log.d(TAG, "onNavigationItemSelected: setting");
+                    if (mSettingView == null) {
+                        SettingViewBuilder builder = new SettingViewBuilder(getContext());
+                        SettingViewDirector director = new SettingViewDirector(builder);
+                        mSettingView = director.construct();
+                    }
+                    frameLayout.removeAllViews();
+                    frameLayout.addView(mSettingView);
+                    result = true;
+                    break;
+                case R.id.news_about:
+                    Log.d(TAG, "onNavigationItemSelected: about");
+                    result = true;
+                    break;
+            }
+            mDrawerLayout.closeDrawers();
+            return result;
         }
     }
 }

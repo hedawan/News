@@ -5,11 +5,11 @@ import android.view.View;
 import com.example.hdw.news.activity.view.builder.ViewBuilder;
 
 /**
- * Created by HDW on 2017/12/27.
+ * Created by HDW on 2018/1/7.
  */
 
-public class MainViewDirector extends ViewBuildDirector {
-    public MainViewDirector(ViewBuilder viewBuilder) {
+public class SettingViewDirector extends ViewBuildDirector {
+    public SettingViewDirector(ViewBuilder viewBuilder) {
         super(viewBuilder);
     }
 
@@ -17,9 +17,9 @@ public class MainViewDirector extends ViewBuildDirector {
     public View construct() {
         mViewBuilder.buildView();
         mViewBuilder.buildToolbar();
-        mViewBuilder.buildNavigation();
         mViewBuilder.buildDrawerLayout();
         mViewBuilder.buildAdapter();
-        return mViewBuilder.getResult();
+        setView(mViewBuilder.getResult());
+        return getView();
     }
 }

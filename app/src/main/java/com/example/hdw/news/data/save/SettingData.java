@@ -12,7 +12,9 @@ import com.example.hdw.news.activity.NewsApplication;
 public class SettingData {
     public static final boolean OPEN = true;
     public static final boolean CLOSE = false;
-    private int mLookNewsMode;
+    public static final int WEB_VIEW = 0;
+    public static final int SYSTEM_BROWSER = 1;
+    private int mReadNewsMode;
     private boolean mAlertSelectLookNewsMode;
     private boolean mNewsUpdate;
     private long mNewsUpdateTime;
@@ -27,7 +29,7 @@ public class SettingData {
         mContext = context;
         mEditor = mContext.getSharedPreferences("Setting", Context.MODE_PRIVATE).edit();
         mSharedPreferences = context.getSharedPreferences("Setting", Context.MODE_PRIVATE);
-        mLookNewsMode = mSharedPreferences.getInt("LookNewsMode", -1);
+        mReadNewsMode = mSharedPreferences.getInt("LookNewsMode", -1);
         mAlertSelectLookNewsMode = mSharedPreferences.getBoolean("AlertSelectLookNewsMode", OPEN);
         mNewsUpdate = mSharedPreferences.getBoolean("NewsUpdate", CLOSE);
         mNewsUpdateTime = mSharedPreferences.getInt("NewsUpdateTime", -1);
@@ -36,9 +38,9 @@ public class SettingData {
     }
 
     private void initSetting() {
-        if (mLookNewsMode == -1) {
-            mEditor.putInt("mLookNewsMode", 1);
-            mLookNewsMode = 1;
+        if (mReadNewsMode == -1) {
+            mEditor.putInt("mReadNewsMode", WEB_VIEW);
+            mReadNewsMode = WEB_VIEW;
         }
         if (mNewsUpdateTime == -1) {
             mEditor.putLong("mNewsUpdateTime", 1);
@@ -58,13 +60,13 @@ public class SettingData {
         return sSettingData;
     }
 
-    public int getLookNewsMode() {
-        return mLookNewsMode;
+    public int getReadNewsMode() {
+        return mReadNewsMode;
     }
 
-    public void setLookNewsMode(int lookNewsMode) {
-        mLookNewsMode = lookNewsMode;
-        mEditor.putInt("mLookNewsMode", lookNewsMode);
+    public void setReadNewsMode(int readNewsMode) {
+        mReadNewsMode = readNewsMode;
+        mEditor.putInt("mReadNewsMode", readNewsMode);
         mEditor.apply();
     }
 

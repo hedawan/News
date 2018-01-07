@@ -15,4 +15,13 @@
         <item>内置浏览器</item>
         <item>系统浏览器</item>
     </string-array>
+    <string name="news_read_mode">阅读模式</string>
+    <string name="news_update">新闻自动更新</string>
+    <string name="news_update_time">自动更新时间间隔</string>
+    <string-array name="select_news_update_time">
+        <item>15 分钟</item>
+        <item>30 分钟</item>
+        <item>1 小时</item>
+    </string-array>
+    <string name="news_url">新闻获取地址</string>
 </resources>

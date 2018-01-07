@@ -49,4 +49,8 @@ public abstract class ViewBuilder implements Builder<View>{
     public void setContext(Context context) {
         mContext = context;
     }
+
+    public LayoutInflater getLayoutInflater() {
+        return mLayoutInflater;
+    }
 }

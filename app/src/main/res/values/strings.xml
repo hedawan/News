@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">News</string>
     <string name="home">Home</string>
@@ -9,9 +10,18 @@
     <string name="news_detail">News detail</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="news_open_alert">Open mode</string>
+    <string name="news_open_alert">News Open alert</string>
     <string-array name="news_open_mode">
-        <item>News WebView</item>
+        <item>Web View</item>
         <item>System browser</item>
     </string-array>
+    <string name="news_read_mode">Read mode</string>
+    <string name="news_update">News update</string>
+    <string name="news_update_time">News update time</string>
+    <string-array name="select_news_update_time">
+        <item>15 min</item>
+        <item>30 min</item>
+        <item>1 hour</item>
+    </string-array>
+    <string name="news_url">News url</string>
 </resources>
