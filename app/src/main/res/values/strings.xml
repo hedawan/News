@@ -22,6 +22,7 @@
         <item>15 min</item>
         <item>30 min</item>
         <item>1 hour</item>
+        <item>10 s</item>
     </string-array>
     <string name="news_url">News url</string>
 </resources>

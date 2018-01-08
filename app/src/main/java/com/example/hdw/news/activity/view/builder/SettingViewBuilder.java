@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -63,7 +64,6 @@ public class SettingViewBuilder extends ViewBuilder {
         final TextView textView = findViewById(R.id.news_update_time_text);
         final int onColor = getContext().getResources().getColor(R.color.black);
         final int offColor = getContext().getResources().getColor(R.color.offColor);
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         if (mReadMode == null) {
             mReadMode = findViewById(R.id.news_read_mode);
             mReadMode.setOnClickListener(new View.OnClickListener() {
@@ -71,6 +71,7 @@ public class SettingViewBuilder extends ViewBuilder {
 
                 @Override
                 public void onClick(View v) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle(R.string.news_read_mode)
                             .setSingleChoiceItems(R.array.news_open_mode, settingData.getReadNewsMode(), new DialogInterface.OnClickListener() {
                                 @Override
@@ -108,8 +109,9 @@ public class SettingViewBuilder extends ViewBuilder {
                 @Override
                 public void onClick(View v) {
                     if (settingData.isNewsUpdate()) {
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                         builder.setTitle(R.string.news_update_time)
-                                .setSingleChoiceItems(R.array.select_news_update_time, settingData.getReadNewsMode(), new DialogInterface.OnClickListener() {
+                                .setSingleChoiceItems(R.array.select_news_update_time, timeParse((int) settingData.getNewsUpdateTime()), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         mSingleChoiceItem = which;
@@ -119,11 +121,17 @@ public class SettingViewBuilder extends ViewBuilder {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         switch (mSingleChoiceItem) {
-                                            case SettingData.WEB_VIEW:
-                                                settingData.setReadNewsMode(SettingData.WEB_VIEW);
+                                            case 0:
+                                                settingData.setNewsUpdateTime(900000);
                                                 break;
-                                            case SettingData.SYSTEM_BROWSER:
-                                                settingData.setReadNewsMode(SettingData.SYSTEM_BROWSER);
+                                            case 1:
+                                                settingData.setNewsUpdateTime(1800000);
+                                                break;
+                                            case 2:
+                                                settingData.setNewsUpdateTime(3600000);
+                                                break;
+                                            case 3:
+                                                settingData.setNewsUpdateTime(10000);
                                                 break;
                                         }
                                     }
@@ -135,6 +143,25 @@ public class SettingViewBuilder extends ViewBuilder {
                                 });
                         builder.show();
                     }
+                }
+
+                public int timeParse(int time) {
+                    int mode = 0;
+                    switch (time) {
+                        case 900000:
+                            mode = 0;
+                            break;
+                        case 1800000:
+                            mode = 1;
+                            break;
+                        case 3600000:
+                            mode = 2;
+                            break;
+                        case 10000:
+                            mode = 3;
+                            break;
+                    }
+                    return mode;
                 }
             });
         }
@@ -165,6 +192,28 @@ public class SettingViewBuilder extends ViewBuilder {
 
         if (mNewsUrl == null) {
             mNewsUrl = findViewById(R.id.news_url);
+            mNewsUrl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    final EditText editText = new EditText(getContext());
+                    editText.setText(settingData.getNewsUrl());
+                    builder.setTitle(R.string.news_url)
+                            .setView(editText)
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    settingData.setNewsUrl(editText.getText().toString());
+                                }
+                            })
+                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                    builder.show();
+                }
+            });
         }
     }
 }
