@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 
+import com.example.hdw.news.R;
 import com.example.hdw.news.activity.view.builder.NewsViewBuilder;
 import com.example.hdw.news.activity.view.director.NewsViewDirector;
 
@@ -30,6 +32,12 @@ public class NewsActivity extends AppCompatActivity {
         mNewsViewBuilder = new NewsViewBuilder(this);
         NewsViewDirector newsViewDirector = new NewsViewDirector(mNewsViewBuilder);
         setContentView(newsViewDirector.construct());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.news_view_menu, menu);
+        return true;
     }
 
     @Override

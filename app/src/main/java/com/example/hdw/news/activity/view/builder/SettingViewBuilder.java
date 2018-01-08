@@ -214,6 +214,7 @@ public class SettingViewBuilder extends ViewBuilder {
                     builder.show();
                 }
             });
+
         }
     }
 }

@@ -25,4 +25,7 @@
         <item>10 s</item>
     </string-array>
     <string name="news_url">News url</string>
+    <string name="comment">Comment</string>
+    <string name="search">Search</string>
+    <string name="share">Share</string>
 </resources>

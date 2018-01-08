@@ -127,7 +127,12 @@ public class MainViewBuilder extends ViewBuilder {
 
             mNestedScrollView.setOnScrollChangeListener(new NewsLoad(newsListAdapter));
         }
+
         Log.d(TAG, "buildAdapter: ");
+    }
+
+    class NewsUpdate {
+
     }
 
     public static class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> implements View.OnClickListener {
@@ -326,6 +331,7 @@ public class MainViewBuilder extends ViewBuilder {
                     Log.d(TAG, "onNavigationItemSelected: home");
                     frameLayout.removeAllViews();
                     frameLayout.addView(mHomeView);
+                    ((AppCompatActivity) getContext()).invalidateOptionsMenu();
                     result = true;
                     break;
                 case R.id.news_setting:
@@ -337,6 +343,7 @@ public class MainViewBuilder extends ViewBuilder {
                     }
                     frameLayout.removeAllViews();
                     frameLayout.addView(mSettingView);
+                    ((AppCompatActivity) getContext()).invalidateOptionsMenu();
                     result = true;
                     break;
                 case R.id.news_about:
@@ -347,5 +354,41 @@ public class MainViewBuilder extends ViewBuilder {
             mDrawerLayout.closeDrawers();
             return result;
         }
+    }
+
+    public View getHomeView() {
+        return mHomeView;
+    }
+
+    public View getSettingView() {
+        return mSettingView;
+    }
+
+    public View getAboutView() {
+        return mAboutView;
+    }
+
+    public Toolbar getToolbar() {
+        return mToolbar;
+    }
+
+    public NavigationView getNavigationView() {
+        return mNavigationView;
+    }
+
+    public DrawerLayout getDrawerLayout() {
+        return mDrawerLayout;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    public NestedScrollView getNestedScrollView() {
+        return mNestedScrollView;
+    }
+
+    public NewsItemClickListener getNewsItemClickListener() {
+        return mNewsItemClickListener;
     }
 }

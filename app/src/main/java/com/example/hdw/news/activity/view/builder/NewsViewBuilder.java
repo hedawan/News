@@ -21,7 +21,6 @@ import com.example.hdw.news.R;
 public class NewsViewBuilder extends ViewBuilder {
     private Toolbar mToolbar;
     private NestedScrollView mNestedScrollView;
-    private LinearLayout mLinearLayout;
     private WebView mWebView;
     public NewsViewBuilder(Context context) {
         this(context,R.layout.news_acticity);
@@ -46,8 +45,7 @@ public class NewsViewBuilder extends ViewBuilder {
     @Override
     public void buildView() {
         mNestedScrollView = findViewById(R.id.nested_scroll_view);
-        mLinearLayout = findViewById(R.id.news_view);
-        mWebView = new WebView(getContext().getApplicationContext());
+        mWebView = findViewById(R.id.web_view);
 
         mWebView.setWebViewClient(new WebViewClient());
         WebSettings webSettings = mWebView.getSettings();
@@ -65,7 +63,6 @@ public class NewsViewBuilder extends ViewBuilder {
         webSettings.setLoadsImagesAutomatically(true);
         
         String newsUrl = ((Activity) getContext()).getIntent().getStringExtra("newsUrl");
-        mLinearLayout.addView(mWebView);
         mWebView.loadUrl(newsUrl);
     }
 

@@ -5,7 +5,10 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.hdw.news.R;
 import com.example.hdw.news.activity.update.UpdateUI;
@@ -19,21 +22,21 @@ import com.example.hdw.news.data.parse.AdapterFinishEvent;
 import com.example.hdw.news.data.parse.AdapterFinishListener;
 import com.example.hdw.news.data.parse.TencentNewsAdapter;
 import com.example.hdw.news.data.save.SettingData;
-import com.facebook.drawee.backends.pipeline.Fresco;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class MainActivity extends AppCompatActivity implements ConnectionFinishListener, AdapterFinishListener {
     private static final String TAG = "MainActivity";
+    MainViewBuilder mMainViewBuilder;
     private UpdateUI mUpdateUI;
     private View mView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainViewBuilder mainViewBuilder = new MainViewBuilder(this);
-        MainViewDirector mainViewDirector = new MainViewDirector(mainViewBuilder);
+        mMainViewBuilder = new MainViewBuilder(this);
+        MainViewDirector mainViewDirector = new MainViewDirector(mMainViewBuilder);
         mView = mainViewDirector.construct();
         setContentView(mView);
         mUpdateUI = UpdateUI.getInstance();
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFinishL
             public void update() {
                 RecyclerView recyclerView = mView.findViewById(R.id.news_list);
                 ((MainViewBuilder.NewsListAdapter) recyclerView.getAdapter()).setTencentNews(event.getTencentNews());
-                Log.d(TAG, "update: "+event.getTencentNews().getTencentNewsList().get(0));
+                Log.d(TAG, "update: " + event.getTencentNews().getTencentNewsList().get(0));
                 recyclerView.getAdapter().notifyDataSetChanged();
                 Log.d(TAG, "update: update finish");
             }
@@ -69,5 +72,40 @@ public class MainActivity extends AppCompatActivity implements ConnectionFinishL
         adapter.addAdapterFinishListener(this);
         adapter.parse();
         Log.d(TAG, "connectionFinish: connection finish");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_view_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        ViewGroup viewGroup = findViewById(R.id.main_view);
+        if (mMainViewBuilder.getHomeView() == viewGroup.getChildAt(0)) {
+            menu.findItem(R.id.search).setVisible(true);
+        } else if (mMainViewBuilder.getHomeView() != viewGroup.getChildAt(0)) {
+            menu.findItem(R.id.search).setVisible(false);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public void onBackPressed() {
+        ViewGroup viewGroup = findViewById(R.id.main_view);
+        if (viewGroup.getChildAt(0).getId() != R.id.news_show) {
+            viewGroup.removeAllViews();
+            viewGroup.addView(mMainViewBuilder.getHomeView());
+            mMainViewBuilder.getNavigationView().setCheckedItem(R.id.news_home);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

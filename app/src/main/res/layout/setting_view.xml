@@ -18,7 +18,7 @@
 
         <ImageView
             style="@style/Image"
-            android:src="@drawable/ic_chevron_right_black_24dp" />
+            app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
 
     </RelativeLayout>
 
@@ -56,7 +56,7 @@
 
         <ImageView
             style="@style/Image"
-            android:src="@drawable/ic_chevron_right_black_24dp" />
+            app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -69,7 +69,7 @@
 
         <ImageView
             style="@style/Image"
-            android:src="@drawable/ic_chevron_right_black_24dp" />
+            app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
     </RelativeLayout>
 
 </LinearLayout>
