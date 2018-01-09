@@ -28,4 +28,6 @@
     <string name="comment">Comment</string>
     <string name="search">Search</string>
     <string name="share">Share</string>
+    <string name="comment_success">Comment success!</string>
+    <string name="write_comment">Write comment</string>
 </resources>

@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.example.hdw.news.R;
 import com.example.hdw.news.data.save.SettingData;
+import com.example.hdw.news.util.TimeParse;
 import com.kyleduo.switchbutton.SwitchButton;
 
 /**
@@ -122,16 +123,16 @@ public class SettingViewBuilder extends ViewBuilder {
                                     public void onClick(DialogInterface dialog, int which) {
                                         switch (mSingleChoiceItem) {
                                             case 0:
-                                                settingData.setNewsUpdateTime(900000);
+                                                settingData.setNewsUpdateTime(TimeParse.minToMillisecond(15));
                                                 break;
                                             case 1:
-                                                settingData.setNewsUpdateTime(1800000);
+                                                settingData.setNewsUpdateTime(TimeParse.minToMillisecond(30));
                                                 break;
                                             case 2:
-                                                settingData.setNewsUpdateTime(3600000);
+                                                settingData.setNewsUpdateTime(TimeParse.minToMillisecond(60));
                                                 break;
                                             case 3:
-                                                settingData.setNewsUpdateTime(10000);
+                                                settingData.setNewsUpdateTime(TimeParse.secondToMillisecond(10));
                                                 break;
                                         }
                                     }

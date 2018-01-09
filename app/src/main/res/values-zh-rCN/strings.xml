@@ -28,4 +28,6 @@
     <string name="comment">评论</string>
     <string name="search">搜索</string>
     <string name="share">分享</string>
+    <string name="comment_success">评论成功！</string>
+    <string name="write_comment">写评论</string>
 </resources>

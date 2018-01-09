@@ -42,8 +42,15 @@ public class NewsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.comment:
+                CommentActivity.startCommentActivity(this, getIntent().getStringExtra("newsUrl"));
+                break;
+            case R.id.share:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

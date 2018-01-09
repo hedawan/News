@@ -219,7 +219,7 @@ public class MainViewBuilder extends ViewBuilder {
             void onItemClick(View view, int position);
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        static class ViewHolder extends RecyclerView.ViewHolder {
             TextView newsTitle;
             SimpleDraweeView newsImage;
 
