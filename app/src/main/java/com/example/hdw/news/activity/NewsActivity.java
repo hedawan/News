@@ -50,6 +50,10 @@ public class NewsActivity extends AppCompatActivity {
                 CommentActivity.startCommentActivity(this, getIntent().getStringExtra("newsUrl"));
                 break;
             case R.id.share:
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, getIntent().getStringExtra("newsUrl"));
+                startActivity(intent);
                 break;
         }
         return super.onOptionsItemSelected(item);

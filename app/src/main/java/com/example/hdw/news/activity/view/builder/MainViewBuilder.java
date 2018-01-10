@@ -29,7 +29,9 @@ import com.example.hdw.news.R;
 import com.example.hdw.news.activity.NewsActivity;
 import com.example.hdw.news.activity.update.UpdateUI;
 import com.example.hdw.news.activity.update.UpdateUIListener;
+import com.example.hdw.news.activity.view.director.AboutViewDirector;
 import com.example.hdw.news.activity.view.director.SettingViewDirector;
+import com.example.hdw.news.activity.view.director.ViewBuildDirector;
 import com.example.hdw.news.data.get.ConnectionFinishEvent;
 import com.example.hdw.news.data.get.ConnectionFinishListener;
 import com.example.hdw.news.data.get.GetNetworkData;
@@ -37,6 +39,8 @@ import com.example.hdw.news.data.news.TencentNews;
 import com.example.hdw.news.data.parse.AdapterFinishEvent;
 import com.example.hdw.news.data.parse.AdapterFinishListener;
 import com.example.hdw.news.data.parse.TencentNewsAdapter;
+import com.example.hdw.news.data.save.SettingChangeEvent;
+import com.example.hdw.news.data.save.SettingChangeListener;
 import com.example.hdw.news.data.save.SettingData;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
@@ -65,6 +69,7 @@ public class MainViewBuilder extends ViewBuilder {
     private View mHomeView;
     private View mSettingView;
     private View mAboutView;
+    private NewsListAdapter mAdapter;
 
     public MainViewBuilder(Context context) {
         super(context, R.layout.activity_main);
@@ -112,27 +117,116 @@ public class MainViewBuilder extends ViewBuilder {
         if (mRecyclerView == null) {
             mRecyclerView = findViewById(R.id.news_list);
             LinearLayoutManager manager = new LinearLayoutManager(getContext());
-            final NewsListAdapter newsListAdapter = new NewsListAdapter();
+            mAdapter = new NewsListAdapter();
             mNestedScrollView = findViewById(R.id.nested_scroll_view);
-            mNewsItemClickListener = new NewsItemClickListener(getContext(), newsListAdapter);
+            mNewsItemClickListener = new NewsItemClickListener(getContext(), mAdapter);
 
             manager.setSmoothScrollbarEnabled(true);
             manager.setAutoMeasureEnabled(true);
 
             mRecyclerView.setLayoutManager(manager);
-            mRecyclerView.setAdapter(newsListAdapter);
+            mRecyclerView.setAdapter(mAdapter);
             mRecyclerView.setHasFixedSize(true);
             mRecyclerView.setNestedScrollingEnabled(false);
-            newsListAdapter.setOnItemClickListener(mNewsItemClickListener);
+            mAdapter.setOnItemClickListener(mNewsItemClickListener);
 
-            mNestedScrollView.setOnScrollChangeListener(new NewsLoad(newsListAdapter));
+            mNestedScrollView.setOnScrollChangeListener(new NewsLoad(mAdapter));
         }
 
         Log.d(TAG, "buildAdapter: ");
     }
 
-    class NewsUpdate {
+    public class NewsUpdate implements Runnable, ConnectionFinishListener, AdapterFinishListener, SettingChangeListener {
+        private long mUpdateTime;
+        private boolean mUpdate;
+        private GetNetworkData mGetNetworkData;
+        private boolean mRequest;
 
+        public NewsUpdate() {
+            mUpdate = true;
+            mUpdateTime = SettingData.getInstance().getNewsUpdateTime();
+            mGetNetworkData = new GetNetworkData(new OkHttpClient.Builder().build(), null);
+            mGetNetworkData.addConnectionFinishListener(this);
+            SettingData.getInstance().addSettingChangeListener(this);
+            mRequest = SettingData.getInstance().isNewsUpdate();
+            startUpdate();
+        }
+
+        public void startUpdate() {
+            if (mRequest) {
+                Log.d(TAG, "startUpdate: 更新线程开启");
+                new Thread(this).start();
+            }
+        }
+
+
+        @Override
+        public void run() {
+            Log.d(TAG, "run: 进入线程");
+            try {
+                while (mUpdate) {
+                    Thread.sleep(1000);
+                    if (mUpdateTime <= 0 && mRequest) {
+                        Log.d(TAG, "run: start running");
+                        Request request = new Request.Builder()
+                                .url(SettingData.getInstance().getNewsUrl())
+                                .build();
+                        mGetNetworkData.setRequest(request);
+                        mGetNetworkData.connection();
+                        mRequest = false;
+                    } else if (mUpdateTime > 0) {
+                        mUpdateTime -= 1000;
+                        Log.d(TAG, "run: update time = " + mUpdateTime);
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void adapterFinish(final AdapterFinishEvent event) {
+            Log.d(TAG, "run: adapter finish");
+            Message message = new Message();
+            message.obj = new UpdateUIListener() {
+                @Override
+                public void update() {
+                    if (!SettingData.getInstance().isNewsUpdate()) return;
+                    mAdapter.setTencentNews(event.getTencentNews());
+                    mAdapter.notifyDataSetChanged();
+                    mNestedScrollView.scrollTo(0, 0);
+                    if (SettingData.getInstance().isNewsUpdate()) {
+                        mUpdateTime = SettingData.getInstance().getNewsUpdateTime();
+                        mRequest = true;
+                    }
+                    Log.d(TAG, "run: update finish");
+                }
+            };
+            UpdateUI.getInstance().sendMessage(message);
+        }
+
+        @Override
+        public void connectionFinish(ConnectionFinishEvent event) {
+            Log.d(TAG, "run: connection finish ");
+            TencentNewsAdapter adapter = new TencentNewsAdapter(event.getResponse());
+            adapter.addAdapterFinishListener(this);
+            adapter.parse();
+        }
+
+        @Override
+        public void settingChange(SettingChangeEvent event) {
+            Log.d(TAG, "settingChange: setting change");
+            if (event.getSettingData().isNewsUpdate()) {
+                mUpdate = true;
+                mRequest = true;
+                mUpdateTime = event.getSettingData().getNewsUpdateTime();
+                startUpdate();
+                Log.d(TAG, "settingChange: 开启更新");
+            } else {
+                mUpdate = false;
+                Log.d(TAG, "settingChange: 关闭更新");
+            }
+        }
     }
 
     public static class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> implements View.OnClickListener {
@@ -245,8 +339,7 @@ public class MainViewBuilder extends ViewBuilder {
                 List<String> tencentNewsIdList = mAdapter.getTencentNewsIdList();
                 List<TencentNews.TencentNewsItem> tencentNewsItemList = mAdapter.getTencentNewsList();
                 int start = tencentNewsItemList.size();
-                StringBuffer newsUrl = new StringBuffer("http://openapi.inews.qq.com/getQQNewsNormalContent?ids=");
-
+                StringBuffer newsUrl = new StringBuffer("https://xw.qq.com/service/api/proxy?key=Xw@2017Mmd&charset=utf-8&url=http://openapi.inews.qq.com/getQQNewsNormalContent?ids=");
 
                 Log.d(TAG, "onScrolled: now to recycler view bottom");
                 if (start >= 200) return;
@@ -257,7 +350,7 @@ public class MainViewBuilder extends ViewBuilder {
                 }
 
                 newsUrl.deleteCharAt(newsUrl.length() - 1);
-                newsUrl.append("&refer=mobilewwwqqcom");
+                newsUrl.append("&refer=mobilewwwqqcom&srcfrom=newsapp&otype=json&&extActionParam=Fimgurl33,Fimgurl32,Fimgurl30&extparam=src,desc");
                 Log.d(TAG, "onScrolled: newsUrl=" + newsUrl);
 
                 OkHttpClient client = new OkHttpClient.Builder().build();
@@ -326,31 +419,37 @@ public class MainViewBuilder extends ViewBuilder {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             boolean result = false;
             FrameLayout frameLayout = findViewById(R.id.main_view);
+            frameLayout.removeAllViews();
+            View view = null;
             switch (item.getItemId()) {
                 case R.id.news_home:
                     Log.d(TAG, "onNavigationItemSelected: home");
-                    frameLayout.removeAllViews();
-                    frameLayout.addView(mHomeView);
-                    ((AppCompatActivity) getContext()).invalidateOptionsMenu();
+                    view = mHomeView;
                     result = true;
                     break;
                 case R.id.news_setting:
                     Log.d(TAG, "onNavigationItemSelected: setting");
                     if (mSettingView == null) {
-                        SettingViewBuilder builder = new SettingViewBuilder(getContext());
-                        SettingViewDirector director = new SettingViewDirector(builder);
+                        ViewBuilder builder = new SettingViewBuilder(getContext());
+                        ViewBuildDirector director = new SettingViewDirector(builder);
                         mSettingView = director.construct();
                     }
-                    frameLayout.removeAllViews();
-                    frameLayout.addView(mSettingView);
-                    ((AppCompatActivity) getContext()).invalidateOptionsMenu();
+                    view = mSettingView;
                     result = true;
                     break;
                 case R.id.news_about:
                     Log.d(TAG, "onNavigationItemSelected: about");
+                    if (mAboutView == null) {
+                        ViewBuilder builder = new AboutViewBuilder(getContext());
+                        ViewBuildDirector director = new AboutViewDirector(builder);
+                        mAboutView = director.construct();
+                    }
+                    view = mAboutView;
                     result = true;
                     break;
             }
+            frameLayout.addView(view);
+            ((AppCompatActivity) getContext()).invalidateOptionsMenu();
             mDrawerLayout.closeDrawers();
             return result;
         }

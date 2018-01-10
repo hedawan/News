@@ -30,4 +30,6 @@
     <string name="share">分享</string>
     <string name="comment_success">评论成功！</string>
     <string name="write_comment">写评论</string>
+    <string name="author">作者：</string>
+    <string name="edition">版本：</string>
 </resources>

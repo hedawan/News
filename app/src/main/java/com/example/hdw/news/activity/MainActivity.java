@@ -55,11 +55,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionFinishL
         message.obj = new UpdateUIListener() {
             @Override
             public void update() {
-                RecyclerView recyclerView = mView.findViewById(R.id.news_list);
+                RecyclerView recyclerView = mMainViewBuilder.getHomeView().findViewById(R.id.news_list);
                 ((MainViewBuilder.NewsListAdapter) recyclerView.getAdapter()).setTencentNews(event.getTencentNews());
-                Log.d(TAG, "update: " + event.getTencentNews().getTencentNewsList().get(0));
                 recyclerView.getAdapter().notifyDataSetChanged();
-                Log.d(TAG, "update: update finish");
+                mMainViewBuilder.new NewsUpdate();
             }
         };
         Log.d(TAG, "adapterFinish: adapter finish");

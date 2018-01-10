@@ -30,4 +30,7 @@
     <string name="share">Share</string>
     <string name="comment_success">Comment success!</string>
     <string name="write_comment">Write comment</string>
+    <string name="author">Author:</string>
+    <string name="edition">Edition:</string>
+    <string name="author_name">HDW</string>
 </resources>

@@ -5,12 +5,14 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.hdw.news.activity.NewsApplication;
+import com.example.hdw.news.data.get.ConnectionFinishEvent;
+import com.example.hdw.news.data.get.ConnectionFinishListener;
 
 /**
  * Created by HDW on 2018/1/5.
  */
 
-public class SettingData {
+public class SettingData extends Setting<SettingData> {
     public static final boolean OPEN = true;
     public static final boolean CLOSE = false;
     public static final int WEB_VIEW = 0;
@@ -50,7 +52,7 @@ public class SettingData {
             mNewsUpdateTime = 1;
         }
         if (mNewsUrl == null) {
-            String newsUrl= "http://openapi.inews.qq.com/getQQNewsIndexAndItems?chlid=news_news_top&refer=mobilewwwqqcom";
+            String newsUrl = "https://xw.qq.com/service/api/proxy?key=Xw@2017Mmd&charset=utf-8&url=http://openapi.inews.qq.com/getQQNewsIndexAndItems?chlid=news_news_top&refer=mobilewwwqqcom&srcfrom=newsapp&otype=json&ext_action=Fimgurl33,Fimgurl32,Fimgurl30";
             mEditor.putString("NewsUrl", newsUrl);
             mNewsUrl = newsUrl;
         }
@@ -71,6 +73,7 @@ public class SettingData {
         mReadNewsMode = readNewsMode;
         mEditor.putInt("ReadNewsMode", readNewsMode);
         mEditor.apply();
+        notifySettingChangeListener(this);
     }
 
     public boolean isAlertSelectLookNewsMode() {
@@ -81,6 +84,7 @@ public class SettingData {
         mAlertSelectLookNewsMode = alertSelectLookNewsMode;
         mEditor.putBoolean("AlertSelectLookNewsMode", alertSelectLookNewsMode);
         mEditor.apply();
+        notifySettingChangeListener(this);
     }
 
     public boolean isNewsUpdate() {
@@ -91,6 +95,7 @@ public class SettingData {
         mNewsUpdate = newsUpdate;
         mEditor.putBoolean("NewsUpdate", mNewsUpdate);
         mEditor.apply();
+        notifySettingChangeListener(this);
     }
 
     public long getNewsUpdateTime() {
@@ -101,6 +106,7 @@ public class SettingData {
         mNewsUpdateTime = newsUpdateTime;
         mEditor.putLong("NewsUpdateTime", newsUpdateTime);
         mEditor.apply();
+        notifySettingChangeListener(this);
     }
 
     public String getNewsUrl() {
@@ -111,5 +117,14 @@ public class SettingData {
         mNewsUrl = newsUrl;
         mEditor.putString("NewsUrl", newsUrl);
         mEditor.apply();
+        notifySettingChangeListener(this);
+    }
+
+    @Override
+    public void notifySettingChangeListener(SettingData o) {
+        SettingChangeEvent event = new SettingChangeEvent(o);
+        for (SettingChangeListener listener : getListeners()) {
+            listener.settingChange(event);
+        }
     }
 }
