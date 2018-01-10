@@ -7,16 +7,11 @@
 
     <include layout="@layout/base_toolbar" />
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/nested_scroll_view"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/news_update_alert"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/news_list"
@@ -24,29 +19,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/gray" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/gray">
-
-                <TextView
-                    android:id="@+id/loading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:padding="10dp"
-                    android:text="@string/loading"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <ProgressBar
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@+id/loading" />
-            </RelativeLayout>
-        </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </android.support.design.widget.CoordinatorLayout>
 

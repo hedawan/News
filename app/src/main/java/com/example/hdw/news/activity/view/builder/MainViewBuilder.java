@@ -11,9 +11,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -64,12 +66,12 @@ public class MainViewBuilder extends ViewBuilder {
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
     private RecyclerView mRecyclerView;
-    private NestedScrollView mNestedScrollView;
     private NewsItemClickListener mNewsItemClickListener;
     private View mHomeView;
     private View mSettingView;
     private View mAboutView;
     private NewsListAdapter mAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public MainViewBuilder(Context context) {
         super(context, R.layout.activity_main);
@@ -118,22 +120,45 @@ public class MainViewBuilder extends ViewBuilder {
             mRecyclerView = findViewById(R.id.news_list);
             LinearLayoutManager manager = new LinearLayoutManager(getContext());
             mAdapter = new NewsListAdapter();
-            mNestedScrollView = findViewById(R.id.nested_scroll_view);
             mNewsItemClickListener = new NewsItemClickListener(getContext(), mAdapter);
-
-            manager.setSmoothScrollbarEnabled(true);
-            manager.setAutoMeasureEnabled(true);
 
             mRecyclerView.setLayoutManager(manager);
             mRecyclerView.setAdapter(mAdapter);
-            mRecyclerView.setHasFixedSize(true);
-            mRecyclerView.setNestedScrollingEnabled(false);
+
+//            DefaultItemAnimator animator = new DefaultItemAnimator();
+//
+//            animator.setAddDuration(10000);
+//            animator.setRemoveDuration(10000);
+//            mRecyclerView.setItemAnimator(animator);
+
+            mRecyclerView.addOnScrollListener(new NewsLoad());
             mAdapter.setOnItemClickListener(mNewsItemClickListener);
 
-            mNestedScrollView.setOnScrollChangeListener(new NewsLoad(mAdapter));
+        }
+
+        if (mSwipeRefreshLayout == null) {
+            mSwipeRefreshLayout = findViewById(R.id.news_update_alert);
+            mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+            });
         }
 
         Log.d(TAG, "buildAdapter: ");
+    }
+
+    public void seedUpdateMessage() {
+        Message message = new Message();
+        message.obj = new UpdateUIListener() {
+            @Override
+            public void update() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        };
+        UpdateUI.getInstance().sendMessage(message);
     }
 
     public class NewsUpdate implements Runnable, ConnectionFinishListener, AdapterFinishListener, SettingChangeListener {
@@ -172,6 +197,7 @@ public class MainViewBuilder extends ViewBuilder {
                                 .url(SettingData.getInstance().getNewsUrl())
                                 .build();
                         mGetNetworkData.setRequest(request);
+                        seedUpdateMessage();
                         mGetNetworkData.connection();
                         mRequest = false;
                     } else if (mUpdateTime > 0) {
@@ -194,7 +220,8 @@ public class MainViewBuilder extends ViewBuilder {
                     if (!SettingData.getInstance().isNewsUpdate()) return;
                     mAdapter.setTencentNews(event.getTencentNews());
                     mAdapter.notifyDataSetChanged();
-                    mNestedScrollView.scrollTo(0, 0);
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    mRecyclerView.scrollToPosition(0);
                     if (SettingData.getInstance().isNewsUpdate()) {
                         mUpdateTime = SettingData.getInstance().getNewsUpdateTime();
                         mRequest = true;
@@ -325,22 +352,23 @@ public class MainViewBuilder extends ViewBuilder {
         }
     }
 
-    public static class NewsLoad implements NestedScrollView.OnScrollChangeListener, ConnectionFinishListener, AdapterFinishListener {
-        private NewsListAdapter mAdapter;
+    public class NewsLoad extends RecyclerView.OnScrollListener implements ConnectionFinishListener, AdapterFinishListener {
+        private OkHttpClient mClient;
+        private GetNetworkData mGetNetworkData;
 
-        public NewsLoad(NewsListAdapter adapter) {
-            mAdapter = adapter;
+        public NewsLoad() {
+            mClient = new OkHttpClient.Builder().build();
+            mGetNetworkData = new GetNetworkData(mClient, null);
+            mGetNetworkData.addConnectionFinishListener(this);
         }
 
         @Override
-        public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-            if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
-                //底部加载
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            if (!mRecyclerView.canScrollVertically(1)) {
                 List<String> tencentNewsIdList = mAdapter.getTencentNewsIdList();
                 List<TencentNews.TencentNewsItem> tencentNewsItemList = mAdapter.getTencentNewsList();
                 int start = tencentNewsItemList.size();
                 StringBuffer newsUrl = new StringBuffer("https://xw.qq.com/service/api/proxy?key=Xw@2017Mmd&charset=utf-8&url=http://openapi.inews.qq.com/getQQNewsNormalContent?ids=");
-
                 Log.d(TAG, "onScrolled: now to recycler view bottom");
                 if (start >= 200) return;
 
@@ -353,13 +381,12 @@ public class MainViewBuilder extends ViewBuilder {
                 newsUrl.append("&refer=mobilewwwqqcom&srcfrom=newsapp&otype=json&&extActionParam=Fimgurl33,Fimgurl32,Fimgurl30&extparam=src,desc");
                 Log.d(TAG, "onScrolled: newsUrl=" + newsUrl);
 
-                OkHttpClient client = new OkHttpClient.Builder().build();
                 Request request = new Request.Builder()
                         .url(newsUrl.toString())
                         .build();
-                GetNetworkData getNetworkData = new GetNetworkData(client, request);
-                getNetworkData.addConnectionFinishListener(this);
-                getNetworkData.connection();
+                mGetNetworkData.setRequest(request);
+                mSwipeRefreshLayout.setRefreshing(true);
+                mGetNetworkData.connection();
             }
         }
 
@@ -372,6 +399,7 @@ public class MainViewBuilder extends ViewBuilder {
                 @Override
                 public void update() {
                     mAdapter.notifyDataSetChanged();
+                    mSwipeRefreshLayout.setRefreshing(false);
                 }
             };
             Log.d(TAG, "adapterFinish: adapter finish");
@@ -481,10 +509,6 @@ public class MainViewBuilder extends ViewBuilder {
 
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
-    }
-
-    public NestedScrollView getNestedScrollView() {
-        return mNestedScrollView;
     }
 
     public NewsItemClickListener getNewsItemClickListener() {
