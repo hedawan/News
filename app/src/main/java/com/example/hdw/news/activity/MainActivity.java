@@ -26,7 +26,7 @@ import com.example.hdw.news.data.save.SettingData;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-public class MainActivity extends AppCompatActivity implements ConnectionFinishListener, AdapterFinishListener {
+public class MainActivity extends BaseActivity implements ConnectionFinishListener, AdapterFinishListener {
     private static final String TAG = "MainActivity";
     MainViewBuilder mMainViewBuilder;
     private UpdateUI mUpdateUI;
@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFinishL
                 .build();
         GetNetworkData getNetworkData = new GetNetworkData(client, request);
         getNetworkData.addConnectionFinishListener(this);
+        mMainViewBuilder.getSwipeRefreshLayout().setRefreshing(true);
         getNetworkData.connection();
     }
 
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFinishL
                 RecyclerView recyclerView = mMainViewBuilder.getHomeView().findViewById(R.id.news_list);
                 ((MainViewBuilder.NewsListAdapter) recyclerView.getAdapter()).setTencentNews(event.getTencentNews());
                 recyclerView.getAdapter().notifyDataSetChanged();
+                mMainViewBuilder.getSwipeRefreshLayout().setRefreshing(false);
                 mMainViewBuilder.new NewsUpdate();
             }
         };

@@ -514,4 +514,8 @@ public class MainViewBuilder extends ViewBuilder {
     public NewsItemClickListener getNewsItemClickListener() {
         return mNewsItemClickListener;
     }
+
+    public SwipeRefreshLayout getSwipeRefreshLayout() {
+        return mSwipeRefreshLayout;
+    }
 }

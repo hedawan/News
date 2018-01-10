@@ -12,7 +12,7 @@ import com.example.hdw.news.activity.view.builder.ViewBuilder;
 import com.example.hdw.news.activity.view.director.CommentViewDirector;
 import com.example.hdw.news.activity.view.director.ViewBuildDirector;
 
-public class CommentActivity extends AppCompatActivity {
+public class CommentActivity extends BaseActivity {
 
     public static void startCommentActivity(Context context, String newsUrl) {
         Intent intent = new Intent(context, CommentActivity.class);

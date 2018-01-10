@@ -17,7 +17,7 @@ import com.example.hdw.news.activity.view.director.NewsViewDirector;
  * Created by HDW on 2018/1/4.
  */
 
-public class NewsActivity extends AppCompatActivity {
+public class NewsActivity extends BaseActivity {
     NewsViewBuilder mNewsViewBuilder;
 
     public static void startNewsActivity(Context context,String newsUrl){
